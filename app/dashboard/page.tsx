@@ -1,31 +1,38 @@
-'use client'
+"use client"
+import { Clock3, Medal, Users } from 'lucide-react'
 import Header from '@/components/Header'
+import DashboardTimer from '@/components/dashboard-timer'
 import { useStudyData } from '@/lib/useStudyData'
 import { hm } from '@/lib/format'
+import type { StudySession } from '@/lib/study-types'
+
+function SessionRow({ session }: { session: StudySession }) {
+  return (
+    <li className="session-row">
+      <span className="session-time">
+        {new Date(session.started_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+      </span>
+      <span className="session-duration">{hm(session.duration_sec)}</span>
+    </li>
+  )
+}
 
 export default function Dashboard() {
-  const { user, stats } = useStudyData()
-  const max = Math.max(1, ...(stats?.week.map((d: any) => d.sec) ?? [1]))
+  const { user, stats, leaderboard } = useStudyData()
+
+  if (!user) {
+    return (
+      <main className="dashboard-shell">
+        <div className="dashboard-loading" role="status">Loading your dashboard…</div>
+      </main>
+    )
+  }
+
+  const sessions = stats?.todaySessions ?? []
+  const entries = leaderboard?.entries ?? []
+  const current = leaderboard?.current
+
   return (
-    <main className="wrap">
-      <Header name={user?.name} streak={stats?.streak} page="dash" />
-      <div className="grid-3">
-        <div className="card"><p className="muted">Today</p><div className="big">{stats ? hm(stats.todaySec) : '–'}</div></div>
-        <div className="card"><p className="muted">Last 7 days</p><div className="big">{stats ? hm(stats.weekSec) : '–'}</div></div>
-        <div className="card"><p className="muted">All time · {stats?.totalSessions ?? 0} sessions</p><div className="big">{stats ? hm(stats.totalSec) : '–'}</div></div>
-      </div>
-      <section className="card">
-        <h2>Daily study time</h2>
-        <div className="bars">
-          {stats?.week.map((d: any) => (
-            <div key={d.date} className="col">
-              <span className="mono">{d.sec ? hm(d.sec) : ''}</span>
-              <div className="bar-fill" style={{ height: `${(d.sec / max) * 100}%` }} />
-              <span className="mono">{new Date(d.date).toLocaleDateString([], { weekday: 'short', timeZone: 'UTC' })}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-    </main>
+    <div></div>
   )
 }
