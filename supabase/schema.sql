@@ -9,7 +9,7 @@ create table sessions (
   user_id uuid not null default auth.uid() references profiles(id) on delete cascade,
   started_at timestamptz not null,
   duration_sec int not null check (duration_sec > 0),
-  created_at timestamptz default now()
+  created_at timestamptz efault now()
 );
 create index on sessions (user_id, started_at desc);
 
