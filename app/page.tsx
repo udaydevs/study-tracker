@@ -40,7 +40,6 @@ export default function Timer() {
   const [sessions, setSessions] = useState<StudySession[]>([])
   const [sessionsLoading, setSessionsLoading] = useState(true)
 
-  // GET: Fetch sessions belonging to the logged-in user
   const loadSessions = useCallback(async () => {
     try {
       const response = await fetch('/api/sessions', {
@@ -135,11 +134,10 @@ export default function Timer() {
   return (
     <main className="dashboard-shell">
       <Header
-        name={user.name}
+        name={user?.name}
         streak={stats?.streak ?? 0}
         page="dash"
       />
-
       <div className="dashboard-grid">
         <section className="dashboard-intro">
           <div className="flex w-full flex-col items-center justify-center gap-8 bg-background px-6 text-center">

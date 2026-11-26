@@ -83,7 +83,11 @@ export function SignupForm({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: trimmedName,
+          options: {
+            data: {
+              name: name.trim(),
+            },
+          },
           email: normalizedEmail,
           password,
         }),
