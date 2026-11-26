@@ -8,6 +8,13 @@
       "when": 1795690485361,
       "tag": "0000_lucky_zuras",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795699324682,
+      "tag": "0001_curvy_veda",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Pause, Play, Square } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // ---------------------------------------------------------------------------
 // deterministic 2-octave value noise — house field, no deps
@@ -27,7 +29,7 @@ function noise2(x: number, y: number) {
 }
 
 // ---------------------------------------------------------------------------
-// VaporCountdown — live timer that COUNTS UP from 00:00:00 to the target.
+// VaporTimer — a stopwatch with Start / Pause / Resume / Stop controls.
 // Every digit change is a phase transition: the outgoing digit sublimates into
 // monochrome grains drifting up on curl-noise wind while the incoming digit
 // condenses from the same cloud, grains spring-seeking their new glyph homes.
@@ -59,33 +61,56 @@ type Slot = {
   active: boolean;
 };
 
-type TimeInput = Date | string | number;
+type Status = "idle" | "running" | "paused";
 
-// stable primitive for the effect deps array (Date identity churns per render)
-const toKey = (d?: TimeInput) => (d instanceof Date ? d.getTime() : d);
-
-export function VaporCountdown({
-  targetDate,
-  startDate,
+export function VaporTimer({
+  onStop,
   labels = DEFAULT_LABELS,
   className = "",
 }: {
-  /** value the timer counts up to — Date, ISO string, or epoch ms; defaults to 24h after the start */
-  targetDate?: TimeInput;
-  /** the moment the clock reads 00:00:00; defaults to when the component mounts.
-   *  Pass a fixed value (e.g. when a study session began) to survive remounts. */
-  startDate?: TimeInput;
+  /** called when Stop is pressed, with the elapsed whole seconds (e.g. to save a study session) */
+  onStop?: (seconds: number) => void;
   /** mono labels under the HH / MM / SS groups; null hides the row */
   labels?: readonly [string, string, string] | null;
-  /** extra classes merged onto the rendered root element */
+  /** extra classes merged onto the outer wrapper */
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timeRef = useRef<HTMLTimeElement>(null);
 
-  const targetKey = toKey(targetDate);
-  const startKey = toKey(startDate);
+  // stopwatch state lives in refs so the animation loop can read it without re-rendering
+  const [status, setStatus] = useState<Status>("idle");
+  const statusRef = useRef<Status>("idle");
+  const accRef = useRef(0); // ms accumulated before the current run
+  const runStartRef = useRef(0); // Date.now() when the current run began
+  const refreshRef = useRef<() => void>(() => {});
+
+  const go = (s: Status) => {
+    statusRef.current = s;
+    setStatus(s);
+    refreshRef.current();
+  };
+  const start = () => {
+    if (statusRef.current === "running") return;
+    if (statusRef.current === "idle") accRef.current = 0;
+    runStartRef.current = Date.now();
+    go("running");
+  };
+  const pause = () => {
+    if (statusRef.current !== "running") return;
+    accRef.current += Date.now() - runStartRef.current;
+    go("paused");
+  };
+  const stop = () => {
+    if (statusRef.current === "idle") return;
+    const ms =
+      accRef.current +
+      (statusRef.current === "running" ? Date.now() - runStartRef.current : 0);
+    accRef.current = 0;
+    go("idle"); // clock returns to 00:00:00
+    onStop?.(Math.floor(ms / 1000));
+  };
 
   useEffect(() => {
     const root = rootRef.current;
@@ -101,18 +126,14 @@ export function VaporCountdown({
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    const toMs = (k: number | string | undefined, fallback: number) =>
-      k == null ? fallback : typeof k === "number" ? k : new Date(k).getTime();
-    const startMs = toMs(startKey, Date.now());
-    const targetMs = toMs(targetKey, startMs + 86_400_000);
-    const total = Math.max(0, targetMs - startMs);
-
     let disposed = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let digits = "000000";
 
-    // counts up from 0 and stops at the target
-    const elapsed = () => Math.min(total, Math.max(0, Date.now() - startMs));
+    // elapsed ms: accumulated time plus the current run, if running
+    const elapsed = () =>
+      accRef.current +
+      (statusRef.current === "running" ? Date.now() - runStartRef.current : 0);
     const toDigits = () => {
       const sec = Math.floor(elapsed() / 1000);
       const h = Math.min(99, Math.floor(sec / 3600));
@@ -423,13 +444,9 @@ export function VaporCountdown({
       wake(); // one paint, then the loop sleeps until the next tick
     };
 
-    // ---- clock: ticks on each elapsed-second boundary of the start time ----
+    // ---- clock: ticks on each elapsed-second boundary while running --------
     const schedule = () => {
-      const nextSec = Math.floor(elapsed() / 1000) + 1;
-      timer = setTimeout(
-        tick,
-        Math.max(0, startMs + nextSec * 1000 - Date.now()) + 15,
-      );
+      timer = setTimeout(tick, 1000 - (elapsed() % 1000) + 15);
     };
     const tick = () => {
       const next = toDigits();
@@ -444,13 +461,17 @@ export function VaporCountdown({
         applyDateTime();
         if (!reduced) wake();
       }
-      if (elapsed() < total) schedule(); // stop once the target is reached
+      if (statusRef.current === "running") schedule();
+    };
+    // called by Start / Pause / Resume / Stop
+    refreshRef.current = () => {
+      if (timer) clearTimeout(timer);
+      tick();
     };
 
     digits = toDigits();
     for (let s = 0; s < 6; s++) digitEls[s].textContent = digits.charAt(s);
     applyDateTime();
-    if (elapsed() < total) schedule();
 
     if (reduced || !ctx) {
       // reduced motion: canvas stays hidden (CSS), the real <time> is visible
@@ -498,53 +519,79 @@ export function VaporCountdown({
       mo.disconnect();
       colorScheme.removeEventListener("change", onThemeChange);
     };
-  }, [targetKey, startKey]);
+  }, []);
 
   return (
-    <div
-      ref={rootRef}
-      className={`relative inline-grid select-none ${className}`}
-      style={{
-        gridTemplateColumns: "repeat(3, auto)",
-        columnGap: "0.45em",
-        rowGap: "0.75rem",
-        fontSize: "clamp(2.5rem, 8vw, 5rem)",
-      }}
-    >
-      {/* real element: screen-reader truth; visible static under reduced motion */}
-      <time ref={timeRef} aria-live="off" style={{ display: "contents" }}>
-        {[0, 1, 2].map((group) => (
-          <span
-            key={group}
-            className="flex justify-center font-semibold leading-none tracking-tight text-foreground opacity-0 tabular-nums motion-reduce:opacity-100"
-          >
-            <span data-vc-digit>0</span>
-            <span data-vc-digit>0</span>
-          </span>
-        ))}
-      </time>
-      {labels &&
-        labels.map((label) => (
-          <span
-            key={label}
-            className="text-center font-mono text-[10px] tracking-[0.25em] text-ns-muted"
-          >
-            {label}
-          </span>
-        ))}
-      <canvas
-        ref={canvasRef}
-        aria-hidden
-        className="pointer-events-none absolute motion-reduce:hidden"
+    <div className={`flex flex-col items-center gap-8 ${className}`}>
+      <div
+        ref={rootRef}
+        className="relative inline-grid select-none"
         style={{
-          left: -PAD_X,
-          top: -PAD_TOP,
-          width: `calc(100% + ${PAD_X * 2}px)`,
-          height: `calc(100% + ${PAD_TOP + PAD_BOTTOM}px)`,
+          gridTemplateColumns: "repeat(3, auto)",
+          columnGap: "0.45em",
+          rowGap: "0.75rem",
+          fontSize: "clamp(2.5rem, 8vw, 5rem)",
         }}
-      />
+      >
+        {/* real element: screen-reader truth; visible static under reduced motion */}
+        <time ref={timeRef} aria-live="off" style={{ display: "contents" }}>
+          {[0, 1, 2].map((group) => (
+            <span
+              key={group}
+              className="flex justify-center font-semibold leading-none tracking-tight text-foreground opacity-0 tabular-nums motion-reduce:opacity-100"
+            >
+              <span data-vc-digit>0</span>
+              <span data-vc-digit>0</span>
+            </span>
+          ))}
+        </time>
+        {labels &&
+          labels.map((label) => (
+            <span
+              key={label}
+              className="text-center font-mono text-[10px] tracking-[0.25em] text-muted-foreground"
+            >
+              {label}
+            </span>
+          ))}
+        <canvas
+          ref={canvasRef}
+          aria-hidden
+          className="pointer-events-none absolute motion-reduce:hidden"
+          style={{
+            left: -PAD_X,
+            top: -PAD_TOP,
+            width: `calc(100% + ${PAD_X * 2}px)`,
+            height: `calc(100% + ${PAD_TOP + PAD_BOTTOM}px)`,
+          }}
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        {status === "idle" && (
+          <Button onClick={start}>
+            <Play fill="currentColor" /> Start
+          </Button>
+        )}
+        {status === "running" && (
+          <Button onClick={pause}>
+            <Pause /> Pause
+          </Button>
+        )}
+        {status === "paused" && (
+          <Button onClick={start}>
+            <Play fill="currentColor" /> Resume
+          </Button>
+        )}
+        {status !== "idle" && (
+          <Button variant="outline" onClick={stop}>
+            <Square /> Stop
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
 
-export default VaporCountdown;
+export const VaporCountdown = VaporTimer; // keeps old imports working
+export default VaporTimer;
