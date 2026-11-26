@@ -1,4 +1,5 @@
 import './globals.css'
+import { Analytics } from "@vercel/analytics/next";
 import { Manrope, IBM_Plex_Mono } from 'next/font/google'
 import TimerProvider from '@/components/TimerProvider'
 
@@ -10,7 +11,8 @@ export const metadata = { title: 'Study Tracker' }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body><TimerProvider>{children}</TimerProvider></body>
+      <body><TimerProvider>{children}  <Analytics />
+      </TimerProvider></body>
     </html>
   )
 }
