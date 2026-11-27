@@ -37,15 +37,6 @@ export async function GET() {
     )
 
     if (error) {
-      // Log the full error in your Next.js terminal
-      console.error('Leaderboard RPC error:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-      })
-
-      // Return the real error while developing
       return NextResponse.json(
         {
           error: 'Failed to fetch leaderboard',
@@ -96,8 +87,6 @@ export async function GET() {
       }
     )
   } catch (error) {
-    console.error('Top user API error:', error)
-
     return NextResponse.json(
       {
         error: 'Internal server error',

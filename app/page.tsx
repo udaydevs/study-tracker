@@ -161,50 +161,41 @@ export default function Timer() {
           </div>
         </section>
 
-        {/* Main dashboard */}
-        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.55fr)_minmax(300px,.85fr)]">
-          {/* Focus timer */}
-          <Card className="min-h-[520px] border-border bg-card">
-            <CardHeader className="gap-1 text-center">
-              <CardTitle className="font-sans text-base font-semibold text-card-foreground">
-                Focus timer
-              </CardTitle>
+        <div className="grid   gap-4 lg:grid-cols-[minmax(0,1.55fr)_minmax(300px,.85fr)]">
+          <div className='grid'>
+            <Card className="">
+              <CardHeader className="gap-1 text-center">
+                <CardTitle className="font-sans text-base font-semibold text-card-foreground">
+                  Focus timer
+                </CardTitle>
+                <CardDescription >
+                  Start a session and give one task your full attention.
+                </CardDescription>
+              </CardHeader>
 
-              <CardDescription className="text-muted-foreground">
-                Start a session and give one task your full attention.
-              </CardDescription>
-            </CardHeader>
+              <CardContent className="flex flex-1 flex-col items-center px-5 sm:px-8">
+                <div className="flex w-full flex-1 flex-col items-center justify-center gap-8">
+                  <DashboardTimer onStop={saveSession} />
 
-            <CardContent className="flex flex-1 flex-col items-center px-5 sm:px-8">
-              <div className="flex w-full flex-1 flex-col items-center justify-center gap-8">
-                <DashboardTimer onStop={saveSession} />
+                  <p className="max-w-md text-center text-xs leading-relaxed text-[var(--s3-faint)]">
+                    Your completed focus sessions are saved to your study
+                    history and analytics.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-                <p className="max-w-md text-center text-xs leading-relaxed text-[var(--s3-faint)]">
-                  Your completed focus sessions are saved to your study
-                  history and analytics.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          </div>
 
           {/* Right column */}
           <div className="grid gap-4">
-            {/* Daily progress */}
             <Card className="border-border bg-card">
               <CardHeader className="flex flex-row items-start justify-between space-y-0">
                 <div>
-                  <CardDescription className="text-muted-foreground">
-                    Daily progress
-                  </CardDescription>
-
                   <CardTitle className="mt-1 text-card-foreground">
                     Today&apos;s sessions
                   </CardTitle>
                 </div>
-
-                <span className="grid size-9 place-items-center rounded-lg bg-plum-soft text-plum">
-                  <Clock3 className="size-4" />
-                </span>
               </CardHeader>
 
               <CardContent>
@@ -213,17 +204,14 @@ export default function Timer() {
                     <p className="text-2xl font-semibold tabular-nums text-foreground">
                       {loading ? '—' : todaySessions.length}
                     </p>
-
                     <p className="mt-1 text-xs text-muted-foreground">
                       sessions
                     </p>
                   </div>
-
                   <div className="rounded-lg bg-muted p-3">
                     <p className="text-2xl font-semibold tabular-nums text-foreground">
                       {stats ? hm(stats.todaySec) : '—'}
                     </p>
-
                     <p className="mt-1 text-xs text-muted-foreground">
                       study time
                     </p>
@@ -251,22 +239,13 @@ export default function Timer() {
               </CardContent>
             </Card>
 
-            {/* Leaderboard */}
             <Card className="border-border bg-card">
               <CardHeader className="flex flex-row items-start justify-between space-y-0">
                 <div>
-                  <CardDescription className="text-muted-foreground">
-                    This week
-                  </CardDescription>
-
                   <CardTitle className="mt-1 text-card-foreground">
                     Leaderboard
                   </CardTitle>
                 </div>
-
-                <span className="grid size-9 place-items-center rounded-lg bg-plum-soft text-plum">
-                  <Medal className="size-4" />
-                </span>
               </CardHeader>
 
               <CardContent>
@@ -279,11 +258,10 @@ export default function Timer() {
                       return (
                         <li
                           key={entry.user_id}
-                          className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm ${
-                            isCurrentUser
+                          className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm ${isCurrentUser
                               ? 'bg-plum-soft text-plum-ink'
                               : 'text-foreground'
-                          }`}
+                            }`}
                         >
                           <span className="w-5 shrink-0 text-center font-mono text-xs text-[var(--s3-faint)]">
                             {index + 1}
