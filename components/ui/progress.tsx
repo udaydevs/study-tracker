@@ -1,3 +1,4 @@
+import * as React from "react"
 import { cn } from "@/lib/utils"
 
 function Progress({ className, value = 0, ...props }: React.ComponentProps<"div"> & { value?: number }) {
