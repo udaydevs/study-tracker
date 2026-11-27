@@ -11,7 +11,7 @@ export const metadata = { title: 'Study Tracker' }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body><TimerProvider>{children}  <Analytics />
+      <body className={sans.className}><TimerProvider>{children}  <Analytics />
       </TimerProvider></body>
     </html>
   )
