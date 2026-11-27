@@ -2,6 +2,7 @@ export type StudySession = {
   id: string
   started_at: string
   duration_sec: number
+  ended_at?: string | null
 }
 
 export type StudyUser = {
@@ -41,4 +42,6 @@ export type StudyData = {
   stats?: StudyStats
   top?: LeaderboardEntry[]
   leaderboard?: LeaderboardData
+  sessions?: StudySession[]
+  loading?: boolean
 }
