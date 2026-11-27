@@ -10,10 +10,10 @@ function Progress({ className, value = 0, ...props }: React.ComponentProps<"div"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(progress)}
-      className={cn("relative h-2 w-full overflow-hidden rounded-full bg-secondary", className)}
+      className={cn("relative h-2 w-full overflow-hidden rounded-full bg-[#ece9f2]", className)}
       {...props}
     >
-      <div data-slot="progress-indicator" className="h-full rounded-full bg-primary transition-[width] duration-300" style={{ width: `${progress}%` }} />
+      <div data-slot="progress-indicator" className="h-full rounded-full bg-[#6b3fd8] transition-[width] duration-300" style={{ width: `${progress}%` }} />
     </div>
   )
 }
