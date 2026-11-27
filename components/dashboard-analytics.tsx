@@ -82,7 +82,7 @@ function ActivityChart({ points }: { points: Point[] }) {
 }
 
 function Bars({ items }: { items: { label: string; value: number }[] }) {
-  const max = Math.max(1, ...items.map((x) => x.value))
+  const max = Math.max(1, ...items.map((item) => item.value))
   return <div className="space-y-3">{items.map((item) => (
     <div key={item.label} className="space-y-1.5">
       <div className="flex justify-between gap-3 text-xs"><span className="text-muted-foreground">{item.label}</span><strong>{hm(item.value)}</strong></div>
@@ -242,11 +242,19 @@ export default function DashboardAnalytics() {
         </section>
 
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="inline-flex rounded-xl border border-[#e7e3ef] bg-white p-1">
-            {(['overview', 'sessions'] as const).map((tab) => <button key={tab} onClick={() => setView(tab)} className={`rounded-lg px-4 py-2 text-xs font-semibold capitalize ${view === tab ? 'bg-[#6b3fd8] text-white shadow-sm' : 'text-[#777187] hover:bg-[#f5f2fb]'}`}>{tab === 'overview' ? 'Overview' : 'Session history'}</button>)}
+          <div className="flex flex-wrap gap-2">
+            {(['overview', 'sessions'] as const).map((tab) => (
+              <Button key={tab} size="sm" variant={view === tab ? 'default' : 'outline'} onClick={() => setView(tab)}>
+                {tab === 'overview' ? 'Overview' : 'Session history'}
+              </Button>
+            ))}
           </div>
-          <div className="inline-flex flex-wrap rounded-xl border border-[#e7e3ef] bg-white p-1">
-            {ranges.map((r) => <button key={r.value} onClick={() => setRange(r.value)} className={`rounded-lg px-3 py-2 text-xs font-semibold ${range === r.value ? 'bg-[#f0eaff] text-[#5a32c1]' : 'text-[#777187] hover:bg-[#f7f5fb]'}`}>{r.label}</button>)}
+          <div className="flex flex-wrap gap-2">
+            {ranges.map((r) => (
+              <Button key={r.value} size="sm" variant={range === r.value ? 'secondary' : 'outline'} onClick={() => setRange(r.value)}>
+                {r.label}
+              </Button>
+            ))}
           </div>
         </div>
 
