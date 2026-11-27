@@ -1,71 +1,22 @@
 "use client"
 
 import * as React from "react"
-import { ResponsiveContainer, Tooltip, type TooltipProps } from "recharts"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 type ChartConfig = Record<string, { label?: React.ReactNode; color?: string }>
-
-const ChartContext = React.createContext<ChartConfig>({})
-
-function ChartContainer({
-  id,
-  config,
-  className,
-  children,
-}: React.ComponentProps<"div"> & {
-  id?: string
-  config: ChartConfig
-  children: React.ReactNode
-}) {
-  const generatedId = React.useId()
-  const chartId = `chart-${id ?? generatedId.replace(/:/g, "")}`
-  return (
-    <ChartContext.Provider value={config}>
-      <div
-        data-chart={chartId}
-        className={cn(
-          "flex aspect-auto justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line]:stroke-border/60 [&_.recharts-tooltip-cursor]:fill-muted/50 [&_.recharts-dot]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke]]:stroke-border [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted/50 [&_.recharts-reference-line_[stroke]]:stroke-border",
-          className
-        )}
-      >
-        <ResponsiveContainer width="100%" height="100%">
-          {children as React.ReactElement}
-        </ResponsiveContainer>
-      </div>
-    </ChartContext.Provider>
-  )
+function ChartContainer({ className, config, children, ...props }: React.ComponentProps<"div"> & { config: ChartConfig }) {
+  return <div data-slot="chart" data-chart-config={Object.keys(config).join(",")} className={cn("w-full text-xs", className)} {...props}>{children}</div>
 }
-
-function ChartTooltipContent({
-  active,
-  payload,
-  label,
-  formatter,
-}: TooltipProps<number, string> & { formatter?: (value: number) => React.ReactNode }) {
-  const config = React.useContext(ChartContext)
-  if (!active || !payload?.length) return null
-  return (
-    <div className="rounded-lg border bg-popover px-3 py-2 text-popover-foreground shadow-md">
-      <p className="mb-1 text-xs font-medium">{String(label ?? "")}</p>
-      {payload.map((item, index) => {
-        const key = String(item.dataKey ?? item.name ?? index)
-        const entry = config[key]
-        const value = Number(item.value ?? 0)
-        return (
-          <div key={key} className="flex items-center gap-2 text-xs">
-            <span className="size-2 rounded-[2px]" style={{ background: item.color ?? entry?.color }} />
-            <span className="text-muted-foreground">{entry?.label ?? item.name ?? key}</span>
-            <strong className="ml-auto pl-4 tabular-nums">{formatter ? formatter(value) : value.toLocaleString()}</strong>
-          </div>
-        )
-      })}
+function ChartBar({ value, max, label, detail, className }: { value: number; max: number; label: string; detail: string; className?: string }) {
+  const height = Math.max(value > 0 ? 3 : 2, Math.min(100, value / Math.max(1, max) * 100))
+  return <div className={cn("group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2", className)} title={`${detail}: ${label}`}>
+    <div className="flex h-full w-full items-end justify-center">
+      <div className="w-[58%] min-w-[3px] rounded-t-md bg-primary/90 transition-[height] duration-300 group-hover:bg-primary" style={{ height: `${height}%` }} />
     </div>
-  )
+    <span className="truncate text-[10px] text-muted-foreground">{label}</span>
+  </div>
 }
-
-function ChartTooltip(props: TooltipProps<number, string> & { formatter?: (value: number) => React.ReactNode }) {
-  return <Tooltip content={<ChartTooltipContent {...props} />} cursor={{ fill: "var(--muted)", opacity: 0.35 }} />
+function ChartGrid({ className, rows = 4 }: { className?: string; rows?: number }) {
+  return <div aria-hidden="true" className={cn("pointer-events-none absolute inset-x-0 inset-y-0 flex flex-col justify-between", className)}>{Array.from({ length: rows }, (_, i) => <div key={i} className="border-t border-dashed border-border/70" />)}</div>
 }
-
-export { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig }
+export { ChartContainer, ChartBar, ChartGrid, type ChartConfig }
