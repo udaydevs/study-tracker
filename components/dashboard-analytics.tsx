@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   Activity, ArrowDownRight, ArrowUpRight, BarChart3, CalendarDays,
-  CalendarRange, Clock3, Flame, Medal, Search, Sparkles, TimerReset,
+  CalendarRange, Clock3, Flame, Search, Sparkles, TimerReset,
   TrendingUp, Trophy, Zap,
   type LucideIcon,
 } from 'lucide-react'
@@ -242,7 +242,7 @@ export default function DashboardAnalytics() {
   return (
     <main className="min-h-screen bg-[#f8f7fb]">
       <div className="dashboard-shell">
-        <Header name={user.name} streak={streak} page="home" />
+        <Header name={user.name} streak={streak} page="dash" />
         <section className="mb-7 mt-3 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
             <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[.15em] text-[#8c849f]"><Sparkles size={14} className="text-[#6b3fd8]" /> Your learning dashboard</div>
