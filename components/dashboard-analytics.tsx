@@ -9,6 +9,10 @@ import {
 } from 'lucide-react'
 import Header from '@/components/Header'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
+import { ChartBar, ChartContainer, ChartGrid } from '@/components/ui/chart'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { hm } from '@/lib/format'
 import { useStudyData } from '@/lib/useStudyData'
@@ -55,42 +59,25 @@ function Metric({
 }
 
 function ActivityChart({ points }: { points: Point[] }) {
-  const w = 720, h = 238, padX = 10, padTop = 12, padBottom = 32
-  const plotH = h - padTop - padBottom
-  const slot = (w - padX * 2) / Math.max(points.length, 1)
-  const barW = Math.min(32, Math.max(4, slot * .58))
-  const max = Math.max(3600, ...points.map((p) => p.value))
-  const labelEvery = points.length <= 7 ? 1 : points.length <= 15 ? 2 : points.length <= 31 ? 5 : 1
+  const max = Math.max(3600, ...points.map((point) => point.value))
   return (
-    <div className="w-full overflow-hidden">
-      <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Study time chart" className="h-[225px] w-full overflow-visible">
-        {[0, 1, 2, 3].map((i) => <line key={i} x1={padX} x2={w - padX} y1={padTop + plotH * i / 3} y2={padTop + plotH * i / 3} stroke="#eeeaf4" strokeDasharray="4 5" />)}
-        {points.map((p, i) => {
-          const bh = p.value ? Math.max(3, p.value / max * plotH) : 2
-          const x = padX + i * slot + (slot - barW) / 2
-          const y = padTop + plotH - bh
-          return <g key={p.detail + i}>
-            <title>{p.detail}: {hm(p.value)}</title>
-            <rect x={x} y={y} width={barW} height={bh} rx={Math.min(6, barW / 2)} fill={p.value ? 'var(--s3-plum)' : '#eeeaf5'} />
-            {(i % labelEvery === 0 || i === points.length - 1) && <text x={x + barW / 2} y={h - 9} textAnchor="middle" fill="#9892a6" fontSize="11">{p.label}</text>}
-          </g>
-        })}
-      </svg>
-    </div>
-  )
-}
-
-function GoalRing({ percent }: { percent: number }) {
-  const size = 112, stroke = 9, r = (size - stroke) / 2, circumference = 2 * Math.PI * r
-  const value = Math.min(100, Math.max(0, percent))
-  return (
-    <div className="relative grid size-28 shrink-0 place-items-center">
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="#eeeaf5" strokeWidth={stroke} fill="none" />
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--s3-plum)" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - value / 100)} fill="none" />
-      </svg>
-      <div className="absolute text-center"><strong className="block text-2xl tracking-[-.06em]">{Math.round(value)}%</strong><span className="text-[10px] text-muted-foreground">goal</span></div>
-    </div>
+    <ChartContainer
+      config={{ focus: { label: "Focus time", color: "var(--primary)" } }}
+      className="h-[225px]"
+    >
+      <div className="relative flex h-full gap-1.5">
+        <ChartGrid className="bottom-7" rows={4} />
+        {points.map((point, index) => (
+          <ChartBar
+            key={point.detail + index}
+            value={point.value}
+            max={max}
+            label={point.label}
+            detail={point.detail}
+          />
+        ))}
+      </div>
+    </ChartContainer>
   )
 }
 
@@ -99,7 +86,7 @@ function Bars({ items }: { items: { label: string; value: number }[] }) {
   return <div className="space-y-3">{items.map((item) => (
     <div key={item.label} className="space-y-1.5">
       <div className="flex justify-between gap-3 text-xs"><span className="text-muted-foreground">{item.label}</span><strong>{hm(item.value)}</strong></div>
-      <div className="h-2 overflow-hidden rounded-full bg-[#f0edf5]"><div className="h-full rounded-full bg-[#6b3fd8]" style={{ width: `${item.value / max * 100}%` }} /></div>
+      <Progress value={item.value / max * 100} className="h-2" />
     </div>
   ))}</div>
 }
@@ -280,7 +267,7 @@ export default function DashboardAnalytics() {
             <Card className="border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]">
               <CardHeader><CardTitle className="text-base tracking-tight">Today's goal</CardTitle><CardDescription>Set a daily target and build a consistent routine</CardDescription></CardHeader>
               <CardContent>
-                <div className="flex items-center gap-4"><GoalRing percent={goalPercent} /><div className="min-w-0 flex-1"><p className="text-2xl font-semibold tracking-[-.05em]">{hm(todayTotal)}</p><p className="mt-1 text-xs text-muted-foreground">of {hm(goalSec)} daily target</p><p className="mt-3 text-xs font-semibold text-[#6b3fd8]">{goalPercent >= 100 ? 'Goal completed today!' : `${hm(Math.max(0, goalSec - todayTotal))} left to reach your goal`}</p></div></div>
+                <div className="space-y-3"><div className="flex items-end justify-between gap-4"><div><p className="text-2xl font-semibold tracking-[-.05em]">{hm(todayTotal)}</p><p className="mt-1 text-xs text-muted-foreground">of {hm(goalSec)} daily target</p></div><span className="text-2xl font-semibold tabular-nums">{Math.round(Math.min(100, goalPercent))}%</span></div><Progress value={goalPercent} className="h-3" /><p className="text-xs font-semibold text-primary">{goalPercent >= 100 ? 'Goal completed today!' : `${hm(Math.max(0, goalSec - todayTotal))} left to reach your goal`}</p></div>
                 <div className="mt-5 border-t border-[#eeeaf3] pt-4"><div className="mb-2 flex items-center justify-between text-xs"><label htmlFor="goal-minutes" className="font-semibold">Daily goal</label><span className="text-muted-foreground">{goalMinutes} min</span></div><input id="goal-minutes" type="range" min={15} max={360} step={15} value={goalMinutes} onChange={(e) => setGoalMinutes(Number(e.target.value))} className="w-full accent-[#6b3fd8]" /><div className="mt-1 flex justify-between text-[10px] text-muted-foreground"><span>15 min</span><span>6 hours</span></div></div>
               </CardContent>
             </Card>
@@ -312,8 +299,8 @@ export default function DashboardAnalytics() {
           </section>
         </> : (
           <Card className="mb-4 border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]">
-            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><CardTitle className="text-base tracking-tight">Session history</CardTitle><CardDescription className="mt-1">Review completed focus sessions</CardDescription></div><div className="relative w-full sm:max-w-xs"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by session date…" className="h-9 w-full rounded-lg border border-[#e7e3ef] bg-white pl-9 pr-3 text-xs outline-none focus:border-[#9b7be8]" /></div></CardHeader>
-            <CardContent><div className="overflow-x-auto"><table className="w-full min-w-[540px] text-left text-sm"><thead><tr className="border-b border-[#eeeaf3] text-[11px] uppercase tracking-[.1em] text-muted-foreground"><th className="pb-3 font-semibold">Date</th><th className="pb-3 font-semibold">Start time</th><th className="pb-3 text-right font-semibold">Duration</th><th className="pb-3 text-right font-semibold">End time</th></tr></thead><tbody>{sessionRows.map((s) => { const from = new Date(s.started_at), to = s.ended_at ? new Date(s.ended_at) : new Date(from.getTime() + duration(s) * 1000); return <tr key={s.id} className="border-b border-[#f0edf5] last:border-0"><td className="py-3 text-xs font-medium">{dateLabel(from, { dateStyle: 'medium' })}</td><td className="py-3 text-xs text-muted-foreground">{dateLabel(from, { hour: 'numeric', minute: '2-digit' })}</td><td className="py-3 text-right text-xs font-semibold tabular-nums">{hm(duration(s))}</td><td className="py-3 text-right text-xs text-muted-foreground">{dateLabel(to, { hour: 'numeric', minute: '2-digit' })}</td></tr>})}</tbody></table>{!sessionRows.length && <div className="py-12 text-center text-sm text-muted-foreground">No sessions match this range and search.</div>}{selected.length > sessionRows.length && <p className="mt-4 text-center text-xs text-muted-foreground">Showing {sessionRows.length} of {selected.length} sessions. Change the range to see more.</p>}</div></CardContent>
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><CardTitle className="text-base tracking-tight">Session history</CardTitle><CardDescription className="mt-1">Review completed focus sessions</CardDescription></div><div className="relative w-full sm:max-w-xs"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by session date…" className="pl-9 text-xs" /></div></CardHeader>
+            <CardContent><div className="overflow-x-auto"><Table className="min-w-[540px]"><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Start time</TableHead><TableHead className="text-right">Duration</TableHead><TableHead className="text-right">End time</TableHead></TableRow></TableHeader><TableBody>{sessionRows.map((s) => { const from = new Date(s.started_at), to = s.ended_at ? new Date(s.ended_at) : new Date(from.getTime() + duration(s) * 1000); return <TableRow key={s.id}><TableCell className="text-xs font-medium">{dateLabel(from, { dateStyle: 'medium' })}</TableCell><TableCell className="text-xs text-muted-foreground">{dateLabel(from, { hour: 'numeric', minute: '2-digit' })}</TableCell><TableCell className="text-right text-xs font-semibold tabular-nums">{hm(duration(s))}</TableCell><TableCell className="text-right text-xs text-muted-foreground">{dateLabel(to, { hour: 'numeric', minute: '2-digit' })}</TableCell></TableRow>})}</TableBody></Table>{!sessionRows.length && <div className="py-12 text-center text-sm text-muted-foreground">No sessions match this range and search.</div>}{selected.length > sessionRows.length && <p className="mt-4 text-center text-xs text-muted-foreground">Showing {sessionRows.length} of {selected.length} sessions. Change the range to see more.</p></div></CardContent>
           </Card>
         )}
 
