@@ -38,16 +38,16 @@ function Metric({
   title: string; value: string; description: string; icon: LucideIcon; change?: number
 }) {
   return (
-    <Card className="border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]">
+    <Card className="border-[#ece9f2] shadow-sm">
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <div>
           <CardDescription className="text-[11px] font-bold uppercase tracking-[.12em]">{title}</CardDescription>
           <CardTitle className="mt-2 text-[1.8rem] font-semibold tracking-[-.055em]">{value}</CardTitle>
         </div>
-        <span className="grid size-10 place-items-center rounded-xl bg-[#f1edff] text-[#6b3fd8]"><Icon size={18} /></span>
+        <span className="grid size-10 place-items-center rounded-xl bg-[#efeafd] text-[#6b3fd8]"><Icon size={18} /></span>
       </CardHeader>
       <CardContent className="flex items-center justify-between gap-2 pt-1">
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-xs text-[#777187]">{description}</p>
         {change !== undefined && (
           <span className={`inline-flex items-center gap-1 text-xs font-semibold ${change >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
             {change >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}{Math.abs(Math.round(change))}%
@@ -85,7 +85,7 @@ function Bars({ items }: { items: { label: string; value: number }[] }) {
   const max = Math.max(1, ...items.map((item) => item.value))
   return <div className="space-y-3">{items.map((item) => (
     <div key={item.label} className="space-y-1.5">
-      <div className="flex justify-between gap-3 text-xs"><span className="text-muted-foreground">{item.label}</span><strong>{hm(item.value)}</strong></div>
+      <div className="flex justify-between gap-3 text-xs"><span className="text-[#777187]">{item.label}</span><strong>{hm(item.value)}</strong></div>
       <Progress value={item.value / max * 100} className="h-2" />
     </div>
   ))}</div>
@@ -219,21 +219,21 @@ export default function DashboardAnalytics() {
       .slice(0, 25)
   }, [selected, search])
 
-  if (!user && loading) return <main className="dashboard-shell"><div className="dashboard-loading" role="status">Loading your analytics…</div></main>
-  if (!user) return <main className="dashboard-shell"><Card className="mx-auto mt-16 max-w-lg"><CardHeader><CardTitle>Analytics unavailable</CardTitle><CardDescription>We couldn't load your study data. Try refreshing.</CardDescription></CardHeader><CardContent><Button onClick={() => void reload()}>Try again</Button></CardContent></Card></main>
+  if (!user && loading) return <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8"><div className="grid min-h-[70vh] place-items-center text-sm text-[#777187]" role="status">Loading your analytics…</div></main>
+  if (!user) return <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8"><Card className="mx-auto mt-16 max-w-lg"><CardHeader><CardTitle>Analytics unavailable</CardTitle><CardDescription>We couldn't load your study data. Try refreshing.</CardDescription></CardHeader><CardContent><Button onClick={() => void reload()}>Try again</Button></CardContent></Card></main>
 
   const leaderboardEntries = leaderboard?.entries ?? []
   const myRank = leaderboard?.current
 
   return (
     <main className="min-h-screen bg-[#f8f7fb]">
-      <div className="dashboard-shell">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Header name={user.name} streak={streak} page="dash" />
         <section className="mb-7 mt-3 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
             <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[.15em] text-[#8c849f]"><Sparkles size={14} className="text-[#6b3fd8]" /> Your learning dashboard</div>
             <h1 className="text-3xl font-semibold tracking-[-.06em] sm:text-4xl">Study analytics<span className="text-[#6b3fd8]">.</span></h1>
-            <p className="mt-2 max-w-xl text-sm text-[#7c768b]">Understand your consistency, focus patterns, and progress over time.</p>
+            <p className="mt-2 max-w-xl text-sm text-[#777187]">Understand your consistency, focus patterns, and progress over time.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => void reload()} disabled={loading}><Activity size={15} />{loading ? 'Refreshing…' : 'Refresh'}</Button>
@@ -267,52 +267,52 @@ export default function DashboardAnalytics() {
           </section>
 
           <section className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,.85fr)]">
-            <Card className="border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]">
-              <CardHeader className="flex flex-row items-start justify-between gap-4"><div><CardTitle className="text-base tracking-tight">Focus activity</CardTitle><CardDescription className="mt-1">Study time across your selected period</CardDescription></div><span className="rounded-lg bg-[#f1edff] p-2 text-[#6b3fd8]"><BarChart3 size={17} /></span></CardHeader>
-              <CardContent><div className="mb-1 flex items-baseline gap-2"><strong className="text-2xl tracking-[-.05em]">{hm(total)}</strong><span className="text-xs text-muted-foreground">total focus</span></div><ActivityChart points={chartPoints} /><div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground"><span>{range === 'all' ? 'Monthly · last 12 months' : range === '90d' ? 'Weekly · last 90 days' : `Daily · last ${range === '7d' ? 'week' : 'month'}`}</span><span>{count} sessions</span></div></CardContent>
+            <Card className="border-[#ece9f2] shadow-sm">
+              <CardHeader className="flex flex-row items-start justify-between gap-4"><div><CardTitle className="text-base tracking-tight">Focus activity</CardTitle><CardDescription className="mt-1">Study time across your selected period</CardDescription></div><span className="rounded-lg bg-[#efeafd] p-2 text-[#6b3fd8]"><BarChart3 size={17} /></span></CardHeader>
+              <CardContent><div className="mb-1 flex items-baseline gap-2"><strong className="text-2xl tracking-[-.05em]">{hm(total)}</strong><span className="text-xs text-[#777187]">total focus</span></div><ActivityChart points={chartPoints} /><div className="mt-2 flex items-center justify-between text-[11px] text-[#777187]"><span>{range === 'all' ? 'Monthly · last 12 months' : range === '90d' ? 'Weekly · last 90 days' : `Daily · last ${range === '7d' ? 'week' : 'month'}`}</span><span>{count} sessions</span></div></CardContent>
             </Card>
 
-            <Card className="border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]">
+            <Card className="border-[#ece9f2] shadow-sm">
               <CardHeader><CardTitle className="text-base tracking-tight">Today's goal</CardTitle><CardDescription>Set a daily target and build a consistent routine</CardDescription></CardHeader>
               <CardContent>
-                <div className="space-y-3"><div className="flex items-end justify-between gap-4"><div><p className="text-2xl font-semibold tracking-[-.05em]">{hm(todayTotal)}</p><p className="mt-1 text-xs text-muted-foreground">of {hm(goalSec)} daily target</p></div><span className="text-2xl font-semibold tabular-nums">{Math.round(Math.min(100, goalPercent))}%</span></div><Progress value={goalPercent} className="h-3" /><p className="text-xs font-semibold text-primary">{goalPercent >= 100 ? 'Goal completed today!' : `${hm(Math.max(0, goalSec - todayTotal))} left to reach your goal`}</p></div>
-                <div className="mt-5 border-t border-[#eeeaf3] pt-4"><div className="mb-2 flex items-center justify-between text-xs"><label htmlFor="goal-minutes" className="font-semibold">Daily goal</label><span className="text-muted-foreground">{goalMinutes} min</span></div><input id="goal-minutes" type="range" min={15} max={360} step={15} value={goalMinutes} onChange={(e) => setGoalMinutes(Number(e.target.value))} className="w-full accent-[#6b3fd8]" /><div className="mt-1 flex justify-between text-[10px] text-muted-foreground"><span>15 min</span><span>6 hours</span></div></div>
+                <div className="space-y-3"><div className="flex items-end justify-between gap-4"><div><p className="text-2xl font-semibold tracking-[-.05em]">{hm(todayTotal)}</p><p className="mt-1 text-xs text-[#777187]">of {hm(goalSec)} daily target</p></div><span className="text-2xl font-semibold tabular-nums">{Math.round(Math.min(100, goalPercent))}%</span></div><Progress value={goalPercent} className="h-3" /><p className="text-xs font-semibold text-[#6b3fd8]">{goalPercent >= 100 ? 'Goal completed today!' : `${hm(Math.max(0, goalSec - todayTotal))} left to reach your goal`}</p></div>
+                <div className="mt-5 border-t border-[#ece9f2] pt-4"><div className="mb-2 flex items-center justify-between text-xs"><label htmlFor="goal-minutes" className="font-semibold">Daily goal</label><span className="text-[#777187]">{goalMinutes} min</span></div><input id="goal-minutes" type="range" min={15} max={360} step={15} value={goalMinutes} onChange={(e) => setGoalMinutes(Number(e.target.value))} className="w-full accent-[#6b3fd8]" /><div className="mt-1 flex justify-between text-[10px] text-[#777187]"><span>15 min</span><span>6 hours</span></div></div>
               </CardContent>
             </Card>
           </section>
 
           <section className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,.85fr)]">
-            <Card className="border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]">
+            <Card className="border-[#ece9f2] shadow-sm">
               <CardHeader><CardTitle className="text-base tracking-tight">Consistency map</CardTitle><CardDescription>Your last 12 weeks of study activity</CardDescription></CardHeader>
               <CardContent>
                 <div className="grid grid-flow-col grid-rows-7 gap-1 overflow-x-auto pb-2">
                   {heatmap.map((d) => { const level = d.value === 0 ? 0 : d.value < 1800 ? 1 : d.value < 3600 ? 2 : d.value < 7200 ? 3 : 4; const colors = ['bg-[#f0edf5]', 'bg-[#e3d8ff]', 'bg-[#c7b4ff]', 'bg-[#9876ed]', 'bg-[#6b3fd8]']; return <div key={dateKey(d.date)} title={`${dateLabel(d.date, { dateStyle: 'medium' })}: ${hm(d.value)}`} className={`size-3 rounded-[3px] ${colors[level]}`} /> })}
                 </div>
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground"><span>{activeDays} active days in selected range</span><div className="flex items-center gap-1.5"><span>Less</span>{['bg-[#f0edf5]', 'bg-[#e3d8ff]', 'bg-[#c7b4ff]', 'bg-[#9876ed]', 'bg-[#6b3fd8]'].map((c) => <span key={c} className={`size-3 rounded-[3px] ${c}`} />)}<span>More</span></div></div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#777187]"><span>{activeDays} active days in selected range</span><div className="flex items-center gap-1.5"><span>Less</span>{['bg-[#f0edf5]', 'bg-[#e3d8ff]', 'bg-[#c7b4ff]', 'bg-[#9876ed]', 'bg-[#6b3fd8]'].map((c) => <span key={c} className={`size-3 rounded-[3px] ${c}`} />)}<span>More</span></div></div>
               </CardContent>
             </Card>
-            <Card className="border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]"><CardHeader><CardTitle className="text-base tracking-tight">When you study</CardTitle><CardDescription>Focus time by time of day</CardDescription></CardHeader><CardContent><Bars items={hourData} /></CardContent></Card>
+            <Card className="border-[#ece9f2] shadow-sm"><CardHeader><CardTitle className="text-base tracking-tight">When you study</CardTitle><CardDescription>Focus time by time of day</CardDescription></CardHeader><CardContent><Bars items={hourData} /></CardContent></Card>
           </section>
 
           <section className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
-            <Card className="border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]"><CardHeader><CardTitle className="text-base tracking-tight">Best study days</CardTitle><CardDescription>Focus time by weekday</CardDescription></CardHeader><CardContent><Bars items={weekdayData} /></CardContent></Card>
-            <Card className="border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]"><CardHeader><CardTitle className="text-base tracking-tight">Personal records</CardTitle><CardDescription>Your strongest study moments</CardDescription></CardHeader><CardContent className="space-y-3">
-              <div className="flex items-center gap-3 rounded-xl bg-[#f8f6fc] p-3"><span className="grid size-9 place-items-center rounded-lg bg-[#eee7ff] text-[#6b3fd8]"><Trophy size={17} /></span><div className="min-w-0 flex-1"><p className="text-xs text-muted-foreground">Longest session</p><strong className="text-lg">{longest ? hm(duration(longest)) : '—'}</strong></div></div>
-              <div className="flex items-center gap-3 rounded-xl bg-[#f8f6fc] p-3"><span className="grid size-9 place-items-center rounded-lg bg-[#fff1d8] text-[#b87917]"><CalendarDays size={17} /></span><div className="min-w-0 flex-1"><p className="text-xs text-muted-foreground">Best day in period</p><strong className="text-lg">{bestDay ? hm(bestDay[1]) : '—'}</strong><p className="truncate text-[11px] text-muted-foreground">{bestDay ? dateLabel(new Date(bestDay[0]), { dateStyle: 'medium' }) : 'No sessions yet'}</p></div></div>
-              <div className="flex items-center gap-3 rounded-xl bg-[#f8f6fc] p-3"><span className="grid size-9 place-items-center rounded-lg bg-[#e7f4ec] text-[#39865e]"><Flame size={17} /></span><div className="min-w-0 flex-1"><p className="text-xs text-muted-foreground">Current streak</p><strong className="text-lg">{streak} days</strong></div></div>
+            <Card className="border-[#ece9f2] shadow-sm"><CardHeader><CardTitle className="text-base tracking-tight">Best study days</CardTitle><CardDescription>Focus time by weekday</CardDescription></CardHeader><CardContent><Bars items={weekdayData} /></CardContent></Card>
+            <Card className="border-[#ece9f2] shadow-sm"><CardHeader><CardTitle className="text-base tracking-tight">Personal records</CardTitle><CardDescription>Your strongest study moments</CardDescription></CardHeader><CardContent className="space-y-3">
+              <div className="flex items-center gap-3 rounded-xl bg-[#f8f6fc] p-3"><span className="grid size-9 place-items-center rounded-lg bg-[#efeafd] text-[#6b3fd8]"><Trophy size={17} /></span><div className="min-w-0 flex-1"><p className="text-xs text-[#777187]">Longest session</p><strong className="text-lg">{longest ? hm(duration(longest)) : '—'}</strong></div></div>
+              <div className="flex items-center gap-3 rounded-xl bg-[#f8f6fc] p-3"><span className="grid size-9 place-items-center rounded-lg bg-[#fff1d8] text-[#9a6713]"><CalendarDays size={17} /></span><div className="min-w-0 flex-1"><p className="text-xs text-[#777187]">Best day in period</p><strong className="text-lg">{bestDay ? hm(bestDay[1]) : '—'}</strong><p className="truncate text-[11px] text-[#777187]">{bestDay ? dateLabel(new Date(bestDay[0]), { dateStyle: 'medium' }) : 'No sessions yet'}</p></div></div>
+              <div className="flex items-center gap-3 rounded-xl bg-[#f8f6fc] p-3"><span className="grid size-9 place-items-center rounded-lg bg-[#e7f4ec] text-[#39865e]"><Flame size={17} /></span><div className="min-w-0 flex-1"><p className="text-xs text-[#777187]">Current streak</p><strong className="text-lg">{streak} days</strong></div></div>
             </CardContent></Card>
-            <Card className="border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]"><CardHeader><CardTitle className="text-base tracking-tight">Weekly leaderboard</CardTitle><CardDescription>Study time with your community</CardDescription></CardHeader><CardContent>
-              {leaderboardEntries.length ? <div className="space-y-2">{leaderboardEntries.slice(0, 5).map((entry, i) => <div key={entry.user_id} className={`flex items-center gap-2 rounded-lg px-2 py-2 text-xs ${entry.user_id === user.id ? 'bg-[#f1edff]' : ''}`}><span className="w-5 text-center text-muted-foreground">{i + 1}</span><span className="min-w-0 flex-1 truncate font-medium">{entry.name}{entry.user_id === user.id ? ' · you' : ''}</span><strong>{hm(entry.total_sec)}</strong></div>)}{myRank && <div className="mt-3 border-t border-[#eeeaf3] pt-3 text-xs text-muted-foreground">Your rank <strong className="float-right text-foreground">{myRank.rank ? `#${myRank.rank}` : 'Not ranked'}</strong></div>}</div> : <div className="rounded-xl border border-dashed p-4 text-xs leading-relaxed text-muted-foreground">Leaderboard will appear when weekly study activity is available.</div>}
+            <Card className="border-[#ece9f2] shadow-sm"><CardHeader><CardTitle className="text-base tracking-tight">Weekly leaderboard</CardTitle><CardDescription>Study time with your community</CardDescription></CardHeader><CardContent>
+              {leaderboardEntries.length ? <div className="space-y-2">{leaderboardEntries.slice(0, 5).map((entry, i) => <div key={entry.user_id} className={`flex items-center gap-2 rounded-lg px-2 py-2 text-xs ${entry.user_id === user.id ? 'bg-[#efeafd]' : ''}`}><span className="w-5 text-center text-[#777187]">{i + 1}</span><span className="min-w-0 flex-1 truncate font-medium">{entry.name}{entry.user_id === user.id ? ' · you' : ''}</span><strong>{hm(entry.total_sec)}</strong></div>)}{myRank && <div className="mt-3 border-t border-[#ece9f2] pt-3 text-xs text-[#777187]">Your rank <strong className="float-right text-[#1c1825]">{myRank.rank ? `#${myRank.rank}` : 'Not ranked'}</strong></div>}</div> : <div className="rounded-xl border border-dashed p-4 text-xs leading-relaxed text-[#777187]">Leaderboard will appear when weekly study activity is available.</div>}
             </CardContent></Card>
           </section>
         </> : (
-          <Card className="mb-4 border-[#e9e7ef] shadow-[0_8px_24px_rgba(24,18,40,.035)]">
-            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><CardTitle className="text-base tracking-tight">Session history</CardTitle><CardDescription className="mt-1">Review completed focus sessions</CardDescription></div><div className="relative w-full sm:max-w-xs"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by session date…" className="pl-9 text-xs" /></div></CardHeader>
-            <CardContent><div className="overflow-x-auto"><Table className="min-w-[540px]"><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Start time</TableHead><TableHead className="text-right">Duration</TableHead><TableHead className="text-right">End time</TableHead></TableRow></TableHeader><TableBody>{sessionRows.map((s) => { const from = new Date(s.started_at), to = s.ended_at ? new Date(s.ended_at) : new Date(from.getTime() + duration(s) * 1000); return <TableRow key={s.id}><TableCell className="text-xs font-medium">{dateLabel(from, { dateStyle: 'medium' })}</TableCell><TableCell className="text-xs text-muted-foreground">{dateLabel(from, { hour: 'numeric', minute: '2-digit' })}</TableCell><TableCell className="text-right text-xs font-semibold tabular-nums">{hm(duration(s))}</TableCell><TableCell className="text-right text-xs text-muted-foreground">{dateLabel(to, { hour: 'numeric', minute: '2-digit' })}</TableCell></TableRow>})}</TableBody></Table>{!sessionRows.length && <div className="py-12 text-center text-sm text-muted-foreground">No sessions match this range and search.</div>}{selected.length > sessionRows.length && <p className="mt-4 text-center text-xs text-muted-foreground">Showing {sessionRows.length} of {selected.length} sessions. Change the range to see more.</p></div></CardContent>
+          <Card className="mb-4 border-[#ece9f2] shadow-sm">
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><CardTitle className="text-base tracking-tight">Session history</CardTitle><CardDescription className="mt-1">Review completed focus sessions</CardDescription></div><div className="relative w-full sm:max-w-xs"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#777187]" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by session date…" className="pl-9 text-xs" /></div></CardHeader>
+            <CardContent><div className="overflow-x-auto"><Table className="min-w-[540px]"><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Start time</TableHead><TableHead className="text-right">Duration</TableHead><TableHead className="text-right">End time</TableHead></TableRow></TableHeader><TableBody>{sessionRows.map((s) => { const from = new Date(s.started_at), to = s.ended_at ? new Date(s.ended_at) : new Date(from.getTime() + duration(s) * 1000); return <TableRow key={s.id}><TableCell className="text-xs font-medium">{dateLabel(from, { dateStyle: 'medium' })}</TableCell><TableCell className="text-xs text-[#777187]">{dateLabel(from, { hour: 'numeric', minute: '2-digit' })}</TableCell><TableCell className="text-right text-xs font-semibold tabular-nums">{hm(duration(s))}</TableCell><TableCell className="text-right text-xs text-[#777187]">{dateLabel(to, { hour: 'numeric', minute: '2-digit' })}</TableCell></TableRow>})}</TableBody></Table>{!sessionRows.length && <div className="py-12 text-center text-sm text-[#777187]">No sessions match this range and search.</div>}{selected.length > sessionRows.length && <p className="mt-4 text-center text-xs text-[#777187]">Showing {sessionRows.length} of {selected.length} sessions. Change the range to see more.</p></div></CardContent>
           </Card>
         )}
 
-        <footer className="mt-6 flex flex-col justify-between gap-2 border-t border-[#e9e5f0] pt-4 text-xs text-[#9892a6] sm:flex-row sm:items-center"><span className="inline-flex items-center gap-1.5"><CalendarRange size={13} /> Analytics from your saved study sessions</span><span>Updated {dateLabel(new Date(), { hour: 'numeric', minute: '2-digit' })}</span></footer>
+        <footer className="mt-6 flex flex-col justify-between gap-2 border-t border-[#ece9f2] pt-4 text-xs text-[#8c849f] sm:flex-row sm:items-center"><span className="inline-flex items-center gap-1.5"><CalendarRange size={13} /> Analytics from your saved study sessions</span><span>Updated {dateLabel(new Date(), { hour: 'numeric', minute: '2-digit' })}</span></footer>
       </div>
     </main>
   )
