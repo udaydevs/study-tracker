@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
 import {
   Activity, ArrowDownRight, ArrowUpRight, BarChart3, CalendarDays,
   CalendarRange, Clock3, Flame, Search, Sparkles, TimerReset,
@@ -106,7 +105,7 @@ function Bars({ items }: { items: { label: string; value: number }[] }) {
 }
 
 export default function DashboardAnalytics() {
-  const { user, stats, leaderboard, sessions = [], loading, reload } = useStudyData()
+  const { user, leaderboard, sessions = [], loading, reload } = useStudyData()
   const [range, setRange] = useState<RangeKey>('30d')
   const [view, setView] = useState<'overview' | 'sessions'>('overview')
   const [search, setSearch] = useState('')
