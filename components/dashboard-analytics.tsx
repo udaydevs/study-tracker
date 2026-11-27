@@ -62,7 +62,7 @@ function ActivityChart({ points }: { points: Point[] }) {
   const max = Math.max(3600, ...points.map((point) => point.value))
   return (
     <ChartContainer
-      config={{ focus: { label: "Focus time", color: "var(--primary)" } }}
+      config={{ focus: { label: "Focus time", color: "#6b3fd8" } }}
       className="h-[225px]"
     >
       <div className="relative flex h-full gap-1.5">
