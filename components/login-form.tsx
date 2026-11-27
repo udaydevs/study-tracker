@@ -2,6 +2,7 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
@@ -36,8 +37,11 @@ export function LoginForm({
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [googleLoading, setGoogleLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
 
   // Email and password login
   const handleLogin = async (
@@ -77,30 +81,30 @@ export function LoginForm({
   }
 
   // Google OAuth login
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true)
-    setError("")
+   const loginWithGoogle = async () => {
+
+    setIsGoogleLoading(true);
+    setError(null);
 
     try {
-      const supabase = createClient()
-
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback${
+            next ? `?next=${encodeURIComponent(next)}` : ""
+          }`,
         },
-      })
+      });
 
       if (error) {
-        setError(error.message)
-        setGoogleLoading(false)
+        throw error;
       }
-    } catch {
-      setError("Unable to connect to Google. Please try again.")
-      setGoogleLoading(false)
+    } catch (error) {
+      setError("There was an error logging in with Google. Please try again.");
+      console.error("Error loging in with Google:", error);
+      setIsGoogleLoading(false);
     }
-  }
-
+  };
   return (
     <div
       className={cn("flex flex-col gap-6", className)}
@@ -140,8 +144,8 @@ export function LoginForm({
                 <Button
                   variant="outline"
                   type="button"
-                  onClick={handleGoogleLogin}
-                  disabled={googleLoading || loading}
+                  onClick={loginWithGoogle}
+                  disabled={isGoogleLoading}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +158,7 @@ export function LoginForm({
                     />
                   </svg>
 
-                  {googleLoading
+                  {isGoogleLoading
                     ? "Connecting to Google..."
                     : "Login with Google"}
                 </Button>
@@ -216,7 +220,7 @@ export function LoginForm({
               <Field>
                 <Button
                   type="submit"
-                  disabled={loading || googleLoading}
+                  disabled={loading || isGoogleLoading}
                 >
                   {loading ? "Logging in..." : "Login"}
                 </Button>
