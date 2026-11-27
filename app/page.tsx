@@ -1,7 +1,5 @@
-
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
 import { Clock3, Medal, Users } from 'lucide-react'
 import Header from '@/components/Header'
 import DashboardTimer from '@/components/dashboard-timer'
@@ -35,42 +33,10 @@ export default function Timer() {
     user,
     stats,
     leaderboard,
+    sessions = [],
+    loading,
   } = useStudyData()
 
-  const [sessions, setSessions] = useState<StudySession[]>([])
-  const [sessionsLoading, setSessionsLoading] = useState(true)
-
-  const loadSessions = useCallback(async () => {
-    try {
-      const response = await fetch('/api/sessions', {
-        cache: 'no-store',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch sessions')
-      }
-
-      const data: StudySession[] = await response.json()
-
-      setSessions(data)
-    } catch (error) {
-      console.error('Failed to load sessions:', error)
-    } finally {
-      setSessionsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    loadSessions()
-
-    window.addEventListener('st:synced', loadSessions)
-
-    return () => {
-      window.removeEventListener('st:synced', loadSessions)
-    }
-  }, [loadSessions])
-
-  // POST: Save one completed session
   async function saveSession(sec: number) {
     const durationSec = Math.floor(Number(sec))
 
@@ -84,9 +50,7 @@ export default function Timer() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          duration_sec: durationSec,
-        }),
+        body: JSON.stringify({ duration_sec: durationSec }),
       })
 
       const data = await response.json()
@@ -95,9 +59,7 @@ export default function Timer() {
         throw new Error(data.error || 'Failed to save session')
       }
 
-      console.log('Study session saved:', data)
-
-      // Trigger GET again after successful POST
+      // The shared hook refreshes the complete dashboard from one endpoint.
       window.dispatchEvent(new Event('st:synced'))
     } catch (error) {
       console.error('Error saving study session:', error)
@@ -108,20 +70,16 @@ export default function Timer() {
     return (
       <main className="dashboard-shell">
         <div className="dashboard-loading" role="status">
-          Loading your dashboard…
+          {loading ? 'Loading your dashboard…' : 'Unable to load dashboard.'}
         </div>
       </main>
     )
   }
 
-  // Filter sessions to today's date
   const today = new Date().toDateString()
 
   const todaySessions = sessions
-    .filter(
-      (session) =>
-        new Date(session.started_at).toDateString() === today
-    )
+    .filter((session) => new Date(session.started_at).toDateString() === today)
     .sort(
       (a, b) =>
         new Date(b.started_at).getTime() -
@@ -134,10 +92,11 @@ export default function Timer() {
   return (
     <main className="dashboard-shell">
       <Header
-        name={user?.name}
+        name={user.name}
         streak={stats?.streak ?? 0}
         page="dash"
       />
+
       <div className="dashboard-grid">
         <section className="dashboard-intro">
           <div className="flex w-full flex-col items-center justify-center gap-8 bg-background px-6 text-center">
@@ -154,7 +113,6 @@ export default function Timer() {
         </section>
 
         <aside className="dashboard-side">
-          {/* Today's sessions */}
           <section
             className="dashboard-card side-card"
             aria-labelledby="sessions-title"
@@ -172,31 +130,22 @@ export default function Timer() {
 
             <div className="today-metrics">
               <div>
-                <strong>
-                  {sessionsLoading ? '—' : todaySessions.length}
-                </strong>
+                <strong>{loading ? '—' : todaySessions.length}</strong>
                 <span>sessions</span>
               </div>
 
               <div>
-                <strong>
-                  {stats ? hm(stats.todaySec) : '—'}
-                </strong>
+                <strong>{stats ? hm(stats.todaySec) : '—'}</strong>
                 <span>study time</span>
               </div>
             </div>
 
-            {sessionsLoading ? (
-              <div className="panel-empty">
-                Loading sessions…
-              </div>
+            {loading ? (
+              <div className="panel-empty">Loading sessions…</div>
             ) : todaySessions.length ? (
               <ul className="session-list">
                 {todaySessions.map((session) => (
-                  <SessionRow
-                    key={session.id}
-                    session={session}
-                  />
+                  <SessionRow key={session.id} session={session} />
                 ))}
               </ul>
             ) : (
@@ -206,7 +155,6 @@ export default function Timer() {
             )}
           </section>
 
-          {/* Leaderboard */}
           <section
             className="dashboard-card side-card"
             aria-labelledby="leaderboard-title"
@@ -233,18 +181,14 @@ export default function Timer() {
                         : 'leaderboard-row'
                     }
                   >
-                    <span className="leaderboard-rank">
-                      {index + 1}
-                    </span>
+                    <span className="leaderboard-rank">{index + 1}</span>
 
                     <span className="leaderboard-name">
                       {entry.name}
                       {entry.user_id === user.id ? ' · you' : ''}
                     </span>
 
-                    <strong>
-                      {hm(entry.total_sec)}
-                    </strong>
+                    <strong>{hm(entry.total_sec)}</strong>
                   </li>
                 ))}
               </ol>
@@ -263,9 +207,7 @@ export default function Timer() {
                   {current.rank ? `#${current.rank}` : 'Not ranked yet'}
                 </strong>
 
-                <small>
-                  {hm(current.total_sec)} this week
-                </small>
+                <small>{hm(current.total_sec)} this week</small>
               </div>
             )}
           </section>
