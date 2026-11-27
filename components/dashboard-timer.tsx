@@ -528,8 +528,8 @@ export function VaporTimer({
         className="relative inline-grid select-none"
         style={{
           gridTemplateColumns: "repeat(3, auto)",
-          columnGap: "0.45em",
-          rowGap: "0.75rem",
+          columnGap: "0.6em",
+          rowGap: "0.85rem",
           fontSize: "clamp(2.5rem, 8vw, 5rem)",
         }}
       >
@@ -538,7 +538,7 @@ export function VaporTimer({
           {[0, 1, 2].map((group) => (
             <span
               key={group}
-              className="flex justify-center font-semibold leading-none tracking-tight text-[#1c1825] opacity-0 tabular-nums motion-reduce:opacity-100"
+              className="flex justify-center text-9xl font-bold leading-none tracking-tight text-[#1c1825] opacity-0 tabular-nums motion-reduce:opacity-100"
             >
               <span data-vc-digit>0</span>
               <span data-vc-digit>0</span>
@@ -549,7 +549,7 @@ export function VaporTimer({
           labels.map((label) => (
             <span
               key={label}
-              className="text-center font-mono text-[10px] tracking-[0.25em] text-[#777187]"
+              className="text-center font-mono text-[12px] tracking-[0.25em] text-[#777187]"
             >
               {label}
             </span>

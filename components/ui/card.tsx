@@ -2,7 +2,12 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 function Card({ className, size = "default", ...props }: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
-  return <div data-slot="card" data-size={size} className={cn("group/card flex flex-col gap-4 overflow-hidden rounded-xl border border-[#ece9f2] bg-white py-4 text-sm text-[#1c1825] shadow-sm data-[size=sm]:gap-3 data-[size=sm]:py-3", className)} {...props} />
+  return <div data-slot="card" data-size={size} className={cn(
+  "group/card flex flex-col overflow-hidden rounded-xl border border-[#ece9f2] bg-white text-sm text-[#1c1825] shadow-sm",
+  "data-[size=default]:gap-4 data-[size=default]:py-4",
+  "data-[size=sm]:gap-3 data-[size=sm]:py-3",
+  className
+)} {...props} />
 }
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="card-header" className={cn("grid auto-rows-min items-start gap-1 px-4", className)} {...props} />
