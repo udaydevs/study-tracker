@@ -39,7 +39,6 @@ export function LoginForm({
   const [loading, setLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
 
@@ -82,6 +81,7 @@ export function LoginForm({
 
   // Google OAuth login
    const loginWithGoogle = async () => {
+   const supabase = createClient();
 
     setIsGoogleLoading(true);
     setError(null);
