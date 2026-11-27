@@ -140,20 +140,37 @@ function Widget() {
   const [pos, setPos] = useState({ x: 24, y: 88 })
   const drag = useRef<{ dx: number; dy: number } | null>(null)
   const handle = {
-    onPointerDown: (e: React.PointerEvent) => { e.currentTarget.setPointerCapture(e.pointerId); drag.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y } },
-    onPointerMove: (e: React.PointerEvent) => { if (drag.current) setPos({ x: Math.max(0, e.clientX - drag.current.dx), y: Math.max(0, e.clientY - drag.current.dy) }) },
+    onPointerDown: (e: React.PointerEvent) => {
+      e.currentTarget.setPointerCapture(e.pointerId)
+      drag.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y }
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      if (drag.current) setPos({ x: Math.max(0, e.clientX - drag.current.dx), y: Math.max(0, e.clientY - drag.current.dy) })
+    },
     onPointerUp: () => { drag.current = null },
   }
+  const actionClass = "rounded-full bg-[#6a35ff] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#5c2ee8] disabled:cursor-not-allowed disabled:opacity-50"
   return (
-    <div className={`widget ${min ? 'min' : ''}`} style={{ left: pos.x, top: pos.y }}>
-      <div className="grip mono" {...handle}>{formatRemaining(remaining)}</div>
+    <div
+      className="fixed z-50 flex items-center gap-1.5 rounded-full border border-[#373047] bg-[#15112a] p-1.5 text-white shadow-xl"
+      style={{ left: pos.x, top: pos.y }}
+    >
+      <div className="cursor-grab touch-none select-none px-2 py-1 font-mono text-xs tabular-nums" {...handle}>
+        {formatRemaining(remaining)}
+      </div>
       {!min && (
-        status === 'running' ? <button onClick={pause}>Pause</button>
-        : status === 'paused' ? <button onClick={start}>Resume</button>
-        : saved ? <button onClick={reset}>Done</button>
-        : <button onClick={complete} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
+        status === 'running' ? <button className={actionClass} onClick={pause}>Pause</button>
+        : status === 'paused' ? <button className={actionClass} onClick={start}>Resume</button>
+        : saved ? <button className={actionClass} onClick={reset}>Done</button>
+        : <button className={actionClass} onClick={complete} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
       )}
-      <button aria-label={min ? 'Expand timer' : 'Minimize timer'} onClick={() => setMin(!min)}>{min ? '+' : '–'}</button>
+      <button
+        className="grid size-7 place-items-center rounded-full bg-white/10 text-sm font-bold transition-colors hover:bg-white/20"
+        aria-label={min ? 'Expand timer' : 'Minimize timer'}
+        onClick={() => setMin(!min)}
+      >
+        {min ? '+' : '–'}
+      </button>
     </div>
   )
 }
