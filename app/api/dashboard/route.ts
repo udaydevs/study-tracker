@@ -46,7 +46,7 @@ export async function GET(request: Request) {
 
         // Keep the same source table and calculation basis as /api/stats.
         supabase
-          .from('study_sessions')
+          .from('sessions')
           .select('id,started_at,duration_sec')
           .order('started_at', { ascending: false })
           .limit(1000),
