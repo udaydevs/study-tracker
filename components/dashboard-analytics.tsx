@@ -1,6 +1,6 @@
 
 'use client'
-
+import { HeatCalendar } from '@/components/charts/heat-calendar'
 import { useEffect, useMemo, useState } from 'react'
 import {
   Activity,
@@ -528,36 +528,50 @@ export default function DashboardAnalytics() {
     return blocks
   }, [selected])
 
-  const heatmap = useMemo(() => {
-    const first = dayStart(new Date())
+  const heatWeeks = 16
 
-    first.setDate(first.getDate() - 83)
-    first.setDate(
-      first.getDate() - ((first.getDay() + 6) % 7)
-    )
-
-    const byDay = new Map<string, number>()
+  const heatCalendar = useMemo(() => {
+    const byDayMinutes = new Map<string, number>()
 
     allSessions.forEach((s) => {
       const key = dateKey(new Date(s.started_at))
-
-      byDay.set(
+      byDayMinutes.set(
         key,
-        (byDay.get(key) ?? 0) + duration(s)
+        (byDayMinutes.get(key) ?? 0) + duration(s) / 60
       )
     })
 
-    return Array.from({ length: 84 }, (_, i) => {
-      const d = new Date(
-        first.getTime() + i * 86400000
-      )
+    const now = new Date()
+    const endUtc = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+    )
+    const mondayOffset = (endUtc.getUTCDay() + 6) % 7
+    const lastMonday = new Date(endUtc.getTime() - mondayOffset * 86400000)
+    const startMonday = new Date(
+      lastMonday.getTime() - (heatWeeks - 1) * 7 * 86400000
+    )
 
-      return {
-        date: d,
-        value: byDay.get(dateKey(d)) ?? 0,
-      }
-    })
+    let peakMinutes = 60
+    for (const mins of byDayMinutes.values()) {
+      if (mins > peakMinutes) peakMinutes = Math.ceil(mins)
+    }
+
+    const values = Array.from({ length: heatWeeks }, (_, w) =>
+      Array.from({ length: 7 }, (_, d) => {
+        const cellDate = new Date(
+          startMonday.getTime() + (w * 7 + d) * 86400000
+        )
+        const key = `${cellDate.getUTCFullYear()}-${String(
+          cellDate.getUTCMonth() + 1
+        ).padStart(2, '0')}-${String(cellDate.getUTCDate()).padStart(2, '0')}`
+        const mins = byDayMinutes.get(key) ?? 0
+        return Math.min(1, mins / peakMinutes)
+      })
+    )
+
+    return { values, maxCount: peakMinutes, endDate: endUtc }
   }, [allSessions])
+
 
   const bestDay = useMemo(() => {
     const totals = new Map<string, number>()
@@ -634,17 +648,21 @@ export default function DashboardAnalytics() {
     )
   }
 
-  const leaderboardEntries = leaderboard?.entries ?? []
+    const leaderboardEntries = leaderboard?.entries ?? []
   const myRank = leaderboard?.current
+  const displayName =
+    leaderboardEntries.find((entry) => entry.user_id === user.id)?.name ||
+    user.name
 
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Header
-          name={user.name}
+          name={displayName}
           streak={streak}
           page="dash"
         />
+
 
         <section className="mb-7 mt-3 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
@@ -671,6 +689,7 @@ export default function DashboardAnalytics() {
             </Button>
 
             <Button
+              variant={'outline'}
               size="sm"
               onClick={() => window.location.assign('/')}
             >
@@ -687,7 +706,7 @@ export default function DashboardAnalytics() {
                 key={tab}
                 size="sm"
                 variant={
-                  view === tab ? 'default' : 'outline'
+                  'outline'
                 }
                 onClick={() => setView(tab)}
               >
@@ -902,65 +921,20 @@ export default function DashboardAnalytics() {
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent>
-                  <div className="grid grid-flow-col grid-rows-7 gap-1 overflow-x-auto pb-2">
-                    {heatmap.map((d) => {
-                      const level =
-                        d.value === 0
-                          ? 0
-                          : d.value < 1800
-                            ? 1
-                            : d.value < 3600
-                              ? 2
-                              : d.value < 7200
-                                ? 3
-                                : 4
-
-                      const colors = [
-                        'bg-[var(--s3-line)]',
-                        'bg-[color-mix(in_srgb,var(--s3-plum)_20%,white)]',
-                        'bg-[color-mix(in_srgb,var(--s3-plum)_40%,white)]',
-                        'bg-[color-mix(in_srgb,var(--s3-plum)_70%,white)]',
-                        'bg-plum',
-                      ]
-
-                      return (
-                        <div
-                          key={dateKey(d.date)}
-                          title={`${dateLabel(d.date, {
-                            dateStyle: 'medium',
-                          })}: ${hm(d.value)}`}
-                          className={`size-3 rounded-[3px] ${colors[level]}`}
-                        />
-                      )
-                    })}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                    <span>
-                      {activeDays} active days in selected range
-                    </span>
-
-                    <div className="flex items-center gap-1.5">
-                      <span>Less</span>
-
-                      {[
-                        'bg-[var(--s3-line)]',
-                        'bg-[color-mix(in_srgb,var(--s3-plum)_20%,white)]',
-                        'bg-[color-mix(in_srgb,var(--s3-plum)_40%,white)]',
-                        'bg-[color-mix(in_srgb,var(--s3-plum)_70%,white)]',
-                        'bg-plum',
-                      ].map((color) => (
-                        <span
-                          key={color}
-                          className={`size-3 rounded-[3px] ${color}`}
-                        />
-                      ))}
-
-                      <span>More</span>
-                    </div>
+                                <CardContent>
+                  <div className="overflow-x-auto pb-1">
+                    <HeatCalendar
+                      unit="min"
+                      weeks={heatWeeks}
+                      maxCount={heatCalendar.maxCount}
+                      values={heatCalendar.values}
+                      endDate={heatCalendar.endDate}
+                      color="var(--s3-plum)"
+                      className="mx-auto"
+                    />
                   </div>
                 </CardContent>
+
               </Card>
 
               <Card className="border-border shadow-sm">

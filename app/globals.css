@@ -121,6 +121,20 @@
   --sidebar-ring: var(--s3-volt);
 }
 .dark {
+  --s3-paper: #15112a;
+  --s3-paper-0: #15112a00;
+  --s3-white: #1d1838;
+  --s3-ink: #f4f1fb;
+  --s3-ink-2: #d8d2ea;
+  --s3-muted: #b3abc9;
+  --s3-faint: #9ca3af;
+  --s3-line: rgba(255, 255, 255, 0.14);
+  --s3-line-2: rgba(255, 255, 255, 0.22);
+  --s3-plum-soft: #2a2350;
+  --s3-plum-ink: #d9ccff;
+  --s3-amber-ink: #fcd34d;
+  --s3-green-ink: #6ee7b7;
+
   --background: var(--s3-night);
   --foreground: #f4f1fb;
   --card: #1d1838;
@@ -143,6 +157,21 @@
   --sidebar-accent: #2a2350;
   --sidebar-accent-foreground: #e6dcff;
   --sidebar-border: #ffffff1f;
+}
+
+/* Dark-mode contrast fixes for utility classes without editing TSX files */
+.dark .bg-foreground.text-primary-foreground {
+  color: var(--background);
+}
+
+.dark [data-slot="card"],
+.dark .bg-white {
+  background-color: var(--card);
+  color: var(--card-foreground);
+}
+
+.dark [data-slot="button"]:not(.bg-primary):not(.bg-foreground) {
+  color: var(--foreground);
 }
 
 @layer base {
